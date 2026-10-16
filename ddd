@@ -1,0 +1,101 @@
+
+-- Для выполнения задания создадим отдельную учебную базу данных
+-- IF DB_ID('HomeworkLesson11_12') IS NULL CREATE DATABASE HomeworkLesson11_12;
+-- GO
+-- USE HomeworkLesson11_12;
+-- GO
+
+
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Persons')
+BEGIN
+    EXEC('CREATE SCHEMA Persons');
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Products')
+BEGIN
+    EXEC('CREATE SCHEMA Products');
+END
+GO
+
+
+
+IF OBJECT_ID('Persons.Customers', 'U') IS NULL
+BEGIN
+    CREATE TABLE Persons.Customers (
+        id INT NULL,                 -- Требование: "id null"
+        FirstName NVARCHAR(50) NOT NULL,
+        LastName NVARCHAR(50) NOT NULL,
+        Email NVARCHAR(100) NULL,
+        Phone NVARCHAR(20) NULL
+    );
+END
+GO
+
+
+IF OBJECT_ID('Persons.Employees', 'U') IS NULL
+BEGIN
+    CREATE TABLE Persons.Employees (
+        id INT NULL,                 -- Требование: "id null"
+        FullName NVARCHAR(100) NOT NULL,
+        Position NVARCHAR(50) NOT NULL,
+        HireDate DATE NOT NULL,
+        Salary DECIMAL(18,2) NULL
+    );
+END
+GO
+
+
+
+ALTER TABLE Persons.Customers DROP COLUMN id;
+ALTER TABLE Persons.Customers ADD id INT IDENTITY(1,1) NOT NULL;
+ALTER TABLE Persons.Customers ADD CONSTRAINT PK_Customers PRIMARY KEY (id);
+GO
+
+-- Для таблицы Persons.Employees
+ALTER TABLE Persons.Employees DROP COLUMN id;
+ALTER TABLE Persons.Employees ADD id INT IDENTITY(1,1) NOT NULL;
+ALTER TABLE Persons.Employees ADD CONSTRAINT PK_Employees PRIMARY KEY (id);
+GO
+
+
+
+IF OBJECT_ID('Products.Categories', 'U') IS NULL
+BEGIN
+    CREATE TABLE Products.Categories (
+        id INT IDENTITY(1,1) NOT NULL PRIMARY KEY, -- Требование: "id pk identity"
+        CategoryName NVARCHAR(100) NOT NULL,
+        Description NVARCHAR(255) NULL
+    );
+END
+GO
+
+
+IF OBJECT_ID('Products.Items', 'U') IS NULL
+BEGIN
+    CREATE TABLE Products.Items (
+        id INT IDENTITY(1,1) NOT NULL PRIMARY KEY, -- Требование: "id pk identity"
+        ProductName NVARCHAR(100) NOT NULL,
+        Price DECIMAL(18,2) NOT NULL
+    );
+END
+GO
+
+
+ALTER SCHEMA Persons TRANSFER Products.Categories;
+GO
+
+
+ALTER SCHEMA Persons TRANSFER Products.Items;
+GO
+
+
+SELECT 
+    s.name AS SchemaName, 
+    t.name AS TableName 
+FROM sys.tables t
+JOIN sys.schemas s ON t.schema_id = s.schema_id
+ORDER BY s.name, t.name;
+GO
+
+PRINT 'Все задания успешно выполнены!';
